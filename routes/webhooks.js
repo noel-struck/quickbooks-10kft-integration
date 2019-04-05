@@ -5,6 +5,7 @@ const express = require('express');
 const router = express.Router();
 const config = require('../conf');
 const services = require('../services');
+const QuickBooks = require('node-quickbooks')
 
 router.post('/', function (req, res) {
 	// CHeck if Token is valid
@@ -69,9 +70,25 @@ router.post('/', function (req, res) {
 	}
 
 	function entityController(entity) {
+		const entityId = entity.id;
+		const qbo = new QuickBooks(
+			config.clientId,
+			config.clientSecret,
+			config.qbo.accessToken,
+			config.qbo.refreshToken,
+			config.qbo.companyId,
+			true, // use the sandbox?
+			true); // set minorversion
 		switch (entity.name) {
 			case 'Customer':
-				console.log(entity.id);
+				console.log(entityId);
+				qbo.getCustomer(entityId, (err, data) => {
+					if (err) {
+						console.log(err);
+					}
+					// TODO: Send this data to 10Kft
+					console.log(data);
+				})
 				break;
 			default:
 				break;

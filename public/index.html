@@ -28,8 +28,6 @@
     <p>Now click the <b>Connect to QuickBooks</b> button below.</p>
     <pre id="accessToken"></pre>
     <a class="imgLink" href="#" id="authorizeUri" ><img src="./images/C2QB_green_btn_lg_default.png" width="178" /></a>
-    <button  type="button" id="retrieveToken" class="btn btn-success">Display Access Token</button>
-    <button  type="button" id="refreshToken" class="btn btn-success">Refresh Token</button>
     <hr />
 <!-- 
     <h2>Make an API call</h2><h4>( Please refer to our <a target="_balnk" href="https://developer.intuit.com/v2/apiexplorer?apiname=V3QBO#?id=Account">API Explorer</a> )</h4>
@@ -72,14 +70,6 @@
         function retrieveToken() {
             // Generate the authUri
             $.get('/retrieveToken', function (token) {
-                var token = (token!=null) ? token : 'Please Authorize Using Connect to Quickbooks first !';
-                $("#accessToken").html(token);
-            });
-        }
-
-        function refreshToken() {
-            // Generate the authUri
-            $.get('/refreshAccessToken', function (token) {
                 var token = (token!=null) ? token : 'Please Authorize Using Connect to Quickbooks first !';
                 $("#accessToken").html(token);
             });

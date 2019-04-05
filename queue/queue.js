@@ -50,7 +50,7 @@ function processTask(task) {
 	                        company[0].refreshToken,
 	                        company[0].companyId,
 	                        true, // set to false for prod
-	                        false); // enable logs
+	                        true); // enable logs
 
 	   			// call CDC
 		   		qbo.changeDataCapture(company[0].webhooksSubscribedEntites, company[0].lastCdcTimestamp, function(err, data) {

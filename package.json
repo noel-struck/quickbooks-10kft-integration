@@ -1,7 +1,7 @@
 {
-  "name": "nodejs-webhooks-sampleapp",
+  "name": "qbo-10kf",
   "version": "1.0.0",
-  "description": "Sample implementation of a webhooks endpoint",
+  "description": "This is a POC taking https://github.com/intuit/oauth-jsclient as resource",
   "author": "Diana De Rose",
   "license": "Intuit",
   "dependencies": {
