@@ -1,30 +1,38 @@
-var moment = require('moment');
-var Datastore = require('nedb'); // for in memory database
-var config = require('../conf'); // constants file
+/* eslint-disable no-console */
+const moment = require('moment');
+const Datastore = require('nedb'); // for in memory database
+const config = require('../conf'); // constants file
 
-var db = new Datastore();
+const db = {};
+const dbMemory = new Datastore();
+// For Quickbook Online
 
-var company1 = { companyId: config.company1.companyId, 
-		    accessToken: config.company1.accessToken,
-		    accessTokenSecret: config.company1.accessTokenSecret,
-		    webhooksSubscribedEntites : config.company1.webhooksSubscribedEntites,
-	        lastCdcTimestamp : moment().format()
-	    },
-	company2 = { companyId: config.company2.companyId, 
-		    accessToken: config.company2.accessToken,
-		    accessTokenSecret: config.company2.accessTokenSecret,
-		    webhooksSubscribedEntites : config.company2.webhooksSubscribedEntites,
-	        lastCdcTimestamp : moment().format()
-	};
+// var	company2 = { companyId: config.company2.companyId, 
+// 		    accessToken: config.company2.accessToken,
+// 		    accessTokenSecret: config.company2.accessTokenSecret,
+// 		    webhooksSubscribedEntites : config.company2.webhooksSubscribedEntites,
+// 	        lastCdcTimestamp : moment().format()
+// 	};
 
+db.insert = () => {
 	/**
-	 * Loads the database with company configs (realmid and access tokens) from conf.js
-	 */
-	db.insert([company1, company2], function (err, newDoc) {   
+	* Loads the database with company configs (realmid and access tokens) from conf.js
+	*/
+	var qbo = {
+		companyId: config.qbo.companyId,
+		accessToken: config.qbo.accessToken,
+		refreshToken: config.qbo.refreshToken,
+		webhooksSubscribedEntites: config.qbo.webhooksSubscribedEntites,
+		lastCdcTimestamp: moment().format()
+	};
+	
+	dbMemory.insert([qbo], function (err, newDoc) {
 		if (err) {
 			return console.log(err);
 		}
-		console.log('company configs inserted into database');
 	});
+};
 
-module.exports.db = db;
+db.dbMemory = dbMemory;
+
+module.exports = db;
