@@ -6,17 +6,18 @@
   "license": "Intuit",
   "dependencies": {
     "async": "^2.0.0-rc.6",
+    "axios": "^0.18.0",
     "body-parser": "latest",
     "crypto": "0.0.3",
+    "dotenv": "^5.0.1",
+    "ejs": "^2.5.2",
     "express": "^4.16.4",
     "express-session": "^1.14.2",
-    "path": "^0.12.7",
-    "ejs": "^2.5.2",
+    "intuit-oauth": "1.1.1",
     "moment": "^2.24.0",
     "nedb": "^1.8.0",
-    "node-quickbooks": "^2.0.30",
     "ngrok": "^2.2.9",
-    "intuit-oauth": "1.1.1",
-    "dotenv": "^5.0.1"
+    "node-quickbooks": "^2.0.30",
+    "path": "^0.12.7"
   }
 }

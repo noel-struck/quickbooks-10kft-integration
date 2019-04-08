@@ -12,6 +12,8 @@ router.get('/', function(req,res) {
         redirectUri: config.redirectUri
     });
 
+    console.log('oauthClient', config.oauthClient);
+
     var authUri = config.oauthClient.authorizeUri(
         {
             scope: [

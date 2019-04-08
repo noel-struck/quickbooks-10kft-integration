@@ -5,10 +5,13 @@ const express = require('express');
 const router = express.Router();
 const config = require('../conf');
 const services = require('../services');
-const QuickBooks = require('node-quickbooks')
+const QuickBooks = require('node-quickbooks');
+const https = require('https');
+const axios = require('axios');
 
 router.post('/', function (req, res) {
-	// CHeck if Token is valid
+	// CHeck if Token is valid.
+	const sandboxURL = 'https://sandbox-quickbooks.api.intuit.com';
 	console.log('webhook oauthClient', config.oauthClient);
 	if (config.oauthClient.isAccessTokenValid()) {
 		listeningWebhook();
@@ -51,8 +54,8 @@ router.post('/', function (req, res) {
 
 		// validate signature
 		if (util.isValidPayload(signature, payload)) {
-			console.log(payload);
-			const entities = payload.eventNotifications[0].dataChangeEvent.entities;
+			const payloadJSON = JSON.parse(payload);
+			const entities = payloadJSON.eventNotifications[0].dataChangeEvent.entities;
 			entities.forEach((item) => {
 				entityController(item);
 			});
@@ -71,24 +74,36 @@ router.post('/', function (req, res) {
 
 	function entityController(entity) {
 		const entityId = entity.id;
-		const qbo = new QuickBooks(
-			config.clientId,
-			config.clientSecret,
-			config.qbo.accessToken,
-			config.qbo.refreshToken,
-			config.qbo.companyId,
-			true, // use the sandbox?
-			true); // set minorversion
-		switch (entity.name) {
+		const entityName = entity.name;
+		const companyId = config.qbo.companyId;
+		const customerPath = `/v3/company/${companyId}/customer/${entityId}`;
+		const customerAPI = `${sandboxURL}/v3/company/${companyId}/customer/${entityId}`;
+		console.log(customerAPI);
+		const axiosOptions = {
+			method: 'get',
+			url: customerAPI,
+			headers: {
+				'Authorization': `Bearer ${config.qbo.accessToken}`,
+				'Accept': 'application/json'
+			}
+		};
+
+		switch (entityName) {
 			case 'Customer':
-				console.log(entityId);
-				qbo.getCustomer(entityId, (err, data) => {
-					if (err) {
-						console.log(err);
-					}
-					// TODO: Send this data to 10Kft
-					console.log(data);
-				})
+				axios(axiosOptions)
+					.then((resp) => {
+						console.log(resp);
+						console.log(JSON.parse(resp.data.Customer))
+					}).catch((error) => {
+						console.log('there was an error ', error);
+					})
+				// config.oauthClient.makeApiCall({url: customerAPI})
+				// 	.then((resp) => {
+				// 		console.log(JSON.parse(resp.text()))
+				// 	})
+				// 	.catch((error) => {
+				// 		console.log('there was an error', error);
+				// 	})
 				break;
 			default:
 				break;
