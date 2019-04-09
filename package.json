@@ -4,6 +4,9 @@
   "description": "This is a POC taking https://github.com/intuit/oauth-jsclient as resource",
   "author": "Diana De Rose",
   "license": "Intuit",
+  "engines": {
+    "node": "10.15.3"
+  },
   "dependencies": {
     "async": "^2.0.0-rc.6",
     "axios": "^0.18.0",

@@ -8,11 +8,12 @@ const services = require('../services');
 const QuickBooks = require('node-quickbooks');
 const https = require('https');
 const axios = require('axios');
+const fs = require('fs');
+const moment = require('moment');
 
 router.post('/', function (req, res) {
 	// CHeck if Token is valid.
 	const sandboxURL = 'https://sandbox-quickbooks.api.intuit.com';
-	console.log('webhook oauthClient', config.oauthClient);
 	if (config.oauthClient.isAccessTokenValid()) {
 		listeningWebhook();
 	} else {
@@ -29,7 +30,7 @@ router.post('/', function (req, res) {
 			});
 	}
 
-	function listeningWebhook() {
+	async function listeningWebhook() {
 		/**
 		 * Method to receive webhooks event notification 
 		 * 1. Validates payload
@@ -56,19 +57,23 @@ router.post('/', function (req, res) {
 		if (util.isValidPayload(signature, payload)) {
 			const payloadJSON = JSON.parse(payload);
 			const entities = payloadJSON.eventNotifications[0].dataChangeEvent.entities;
-			entities.forEach((item) => {
-				entityController(item);
-			});
+			
 			// TODO: Fix issue with AUTH in the following method
 			// queue.addToQueue(payload);
 			// console.log('task added to queue ');
 
-			// TODO: Call here the corresponding API that match with its entity
-
-
+			// Call here the corresponding API that match with its entity
+			await processEntities(entities);
+			console.log('enttites processed');
 			return res.status(200).send('success');
 		} else {
 			return res.status(401).send('FORBIDDEN');
+		}
+	}
+
+	async function processEntities(entities) {
+		for (const item of entities) {
+			await entityController(item);
 		}
 	}
 
@@ -76,12 +81,10 @@ router.post('/', function (req, res) {
 		const entityId = entity.id;
 		const entityName = entity.name;
 		const companyId = config.qbo.companyId;
-		const customerPath = `/v3/company/${companyId}/customer/${entityId}`;
-		const customerAPI = `${sandboxURL}/v3/company/${companyId}/customer/${entityId}`;
-		console.log(customerAPI);
-		const axiosOptions = {
+		const customerApi = `${sandboxURL}/v3/company/${companyId}/customer/${entityId}`;
+		const customerApiOptions = {
 			method: 'get',
-			url: customerAPI,
+			url: customerApi,
 			headers: {
 				'Authorization': `Bearer ${config.qbo.accessToken}`,
 				'Accept': 'application/json'
@@ -90,20 +93,18 @@ router.post('/', function (req, res) {
 
 		switch (entityName) {
 			case 'Customer':
-				axios(axiosOptions)
+				const fileName = `${moment().format('YY-MM-DD')}-customer-data.json`;
+				axios(customerApiOptions)
 					.then((resp) => {
-						console.log(resp);
-						console.log(JSON.parse(resp.data.Customer))
+						const jsonData = resp.data.Customer;
+						jsonToSave = JSON.stringify(jsonData);
+						fs.writeFile(fileName, jsonToSave, (error) => {
+							if (error) throw error;
+							console.log('file saved');
+						})		
 					}).catch((error) => {
 						console.log('there was an error ', error);
-					})
-				// config.oauthClient.makeApiCall({url: customerAPI})
-				// 	.then((resp) => {
-				// 		console.log(JSON.parse(resp.text()))
-				// 	})
-				// 	.catch((error) => {
-				// 		console.log('there was an error', error);
-				// 	})
+					});
 				break;
 			default:
 				break;
