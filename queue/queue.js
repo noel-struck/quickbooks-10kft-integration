@@ -7,7 +7,6 @@ const database = require('../db/db.js'); // database operations
 /**
  * Manages a queue and executes a single async thread to process 
  * the queue whenever an item is added to the queue
- *
  */
 
 // creating a queue with concurrency 1
@@ -20,13 +19,12 @@ function addToQueue(payload) {
 	q.push(payload);
 }
 
-/**
+/*
  * Process the queue task
  * 1. Retrieves the realmId from the payload 
  * 2. Queries the database to get the last CDC performed time and auth keys for the realmId
  * 3. Performs CDC for all the subscribed entities using the lastCDCTime retrieved in step 2
  * 4. Updates the database record with the last CDC performed time for the realmId - time when step 3 was performed
- *
  */
 function processTask(task) {
 	console.log('processing task in queue');

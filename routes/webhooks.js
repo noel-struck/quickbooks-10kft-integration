@@ -13,11 +13,10 @@ const moment = require('moment');
 
 router.post('/', function (req, res) {
 	// CHeck if Token is valid.
-	const sandboxURL = 'https://sandbox-quickbooks.api.intuit.com';
 	if (config.oauthClient.isAccessTokenValid()) {
 		listeningWebhook();
 	} else {
-		console.log('token is invalid, create a new one');
+		console.log('token is invalid, creating a new one...');
 		config.oauthClient.refresh()
 			.then((authResponse) => {
 				console.log('token refreshed: ', authResponse);
@@ -30,7 +29,7 @@ router.post('/', function (req, res) {
 			});
 	}
 
-	async function listeningWebhook() {
+	function listeningWebhook() {
 		/**
 		 * Method to receive webhooks event notification 
 		 * 1. Validates payload
@@ -59,12 +58,11 @@ router.post('/', function (req, res) {
 			const entities = payloadJSON.eventNotifications[0].dataChangeEvent.entities;
 			
 			// TODO: Fix issue with AUTH in the following method
-			// queue.addToQueue(payload);
+			queue.addToQueue(payload);
 			// console.log('task added to queue ');
 
 			// Call here the corresponding API that match with its entity
-			await processEntities(entities);
-			console.log('enttites processed');
+			processEntities(entities);
 			return res.status(200).send('success');
 		} else {
 			return res.status(401).send('FORBIDDEN');
@@ -81,7 +79,7 @@ router.post('/', function (req, res) {
 		const entityId = entity.id;
 		const entityName = entity.name;
 		const companyId = config.qbo.companyId;
-		const customerApi = `${sandboxURL}/v3/company/${companyId}/customer/${entityId}`;
+		const customerApi = `${config.qbo.sandboxApi}/v3/company/${companyId}/customer/${entityId}`;
 		const customerApiOptions = {
 			method: 'get',
 			url: customerApi,
@@ -97,6 +95,10 @@ router.post('/', function (req, res) {
 				axios(customerApiOptions)
 					.then((resp) => {
 						const jsonData = resp.data.Customer;
+						const tenKftProject = parseProjectFromQboToTenKft(jsonData);
+						createTenKftProject(tenKftProject);
+
+						// Save in a file for checking purpose
 						jsonToSave = JSON.stringify(jsonData);
 						fs.writeFile(fileName, jsonToSave, (error) => {
 							if (error) throw error;
@@ -109,6 +111,35 @@ router.post('/', function (req, res) {
 			default:
 				break;
 		}
+	}
+
+	function parseProjectFromQboToTenKft(payload) {
+		return {
+			name: payload.DisplayName,
+			starts_at: moment(payload.MetaData.CreateTime).format('YYYY-MM-DD'),
+			ends_at: moment(payload.MetaData.LastUpdatedTime).add(1, 'year').format('YYYY-MM-DD')
+		};
+		
+	}
+
+	function createTenKftProject(payload) {
+		const tenKftProjectApi = `${config.tenKft.sandboxApi}/api/v1/projects`;
+		const apiOptions = {
+			method: 'post',
+			url: tenKftProjectApi,
+			data: payload,
+			headers: {
+				'Content-Type': 'application/json',
+				'auth': config.tenKft.token
+			}
+		}
+		axios(apiOptions)
+			.then((resp) => {
+				console.log('Project added: ', resp.data);
+			})
+			.catch((error) => {
+				console.log('There was an error trying to insert a new project in 10Kft ', error);
+			})
 	}
 })
 
