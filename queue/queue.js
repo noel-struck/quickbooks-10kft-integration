@@ -40,28 +40,29 @@ function processTask(task) {
 			if (err) {
 				return console.log(err);
 			} else {	   		
-				console.log('calling CDC');
 				var qbo = new QuickBooks(
 							config.clientId,
-	                       	config.clientSecret,
-	                        company[0].accessToken,
-	                        company[0].refreshToken,
-	                        company[0].companyId,
-	                        true, // set to false for prod
-	                        true); // enable logs
+							config.clientSecret,
+							company[0].accessToken,
+							false, // No token secret for oAuth2
+							company[0].companyId,
+							true, // use sandbox account
+							true, // enable logs
+							4, // minor version
+							'2.0', // oAuth2
+							company[0].refreshToken); 
 
-	   			// call CDC
-		   		qbo.changeDataCapture(company[0].webhooksSubscribedEntites, company[0].lastCdcTimestamp, function(err, data) {
-				  if (err) {
-					  return console.log('There was an error', err);
-					  
-				  } else {
-				  	console.log('CDC complete');
-				  	//update timestamp
-				  	database.update({ companyId: realmId }, { $set:{lastCdcTimestamp: data.time}}, {});
-				  	console.log('completed update for realmId ' + realmId);
-				  	console.log('queue task complete');
-				  }
+				// call CDC
+				qbo.changeDataCapture(company[0].webhooksSubscribedEntites, company[0].lastCdcTimestamp, function(err, data) {
+					if (err) {
+						return console.log('There was an error', err);  
+					} else {
+					console.log('CDC complete');
+					//update timestamp
+					database.dbMemory.update({ companyId: realmId }, { $set:{lastCdcTimestamp: data.time}}, {});
+					console.log('completed update for realmId ' + realmId);
+					console.log('queue task complete');
+					}
 				});
 			}
 		});

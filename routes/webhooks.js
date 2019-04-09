@@ -89,6 +89,18 @@ router.post('/', function (req, res) {
 			}
 		};
 
+		// var qbo = new QuickBooks(
+		// 	config.clientId,
+		// 	config.clientSecret,
+		// 	config.qbo.tokenSecret,
+		// 	false, // No token secret for oAuth2
+		// 	config.qbo.companyId,
+		// 	true, // use sandbox account
+		// 	true, // enable logs
+		// 	4, // minor version
+		// 	'2.0', // oAuth2
+		// 	config.qbo.refreshToken); 
+
 		switch (entityName) {
 			case 'Customer':
 				const fileName = `${moment().format('YY-MM-DD')}-customer-data.json`;
