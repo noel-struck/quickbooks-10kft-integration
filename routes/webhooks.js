@@ -101,6 +101,7 @@ router.post('/', function (req, res) {
 	function parseProjectFromQboToTenKft(payload) {
 		return {
 			name: payload.DisplayName,
+			project_code: payload.Id,
 			starts_at: moment(payload.MetaData.CreateTime).format('YYYY-MM-DD'),
 			ends_at: moment(payload.MetaData.LastUpdatedTime).add(1, 'year').format('YYYY-MM-DD') // Edit this to the right time average for a project
 		};

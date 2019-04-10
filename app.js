@@ -9,6 +9,7 @@ var app = express();
 var path = require('path');
 var bodyParser = require('body-parser');
 var ngrok =  (process.env.NGROK_ENABLED==="true") ? require('ngrok'):null;
+var config = require('./conf');
 
 /**
  * Configure View and Handlebars
@@ -21,10 +22,11 @@ app.set('view engine', 'html');
 app.use(bodyParser.json());
 
 // TODO: Check this for webhook, probably be part of this main Doc
-var webhooks = require('./routes/webhooks.js');
-var authUri = require('./routes/auth-uri.js');
-var callback = require('./routes/callback');
-var refreshToken = require('./routes/refresh-token');
+const webhooks = require('./routes/webhooks.js');
+const authUri = require('./routes/auth-uri.js');
+const callback = require('./routes/callback');
+const refreshToken = require('./routes/refresh-token');
+const webhooks10K = require('./routes/webhooks-10k');
 
 var redirectUri = '';
 
@@ -32,7 +34,11 @@ var redirectUri = '';
 app.get('/', function(req, res) { res.render('index'); });
 
 // When you are connected
-app.get('/connected', function(req, res) { res.render('connected'); });
+app.get('/connected', function(req, res) {
+    if (config.qbo.accessToken) {
+        res.send('Connected to QBO');
+    }
+});
 
 // Get the AuthorizeUri
 app.use('/authUri', authUri);
@@ -45,6 +51,8 @@ app.use('/refreshAccessToken', refreshToken);
 
 // Webhooks POST listening
 app.use('/webhooks', webhooks);
+
+app.use('/webhooks10k', webhooks10K);
 
 
 /**

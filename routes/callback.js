@@ -10,11 +10,12 @@ router.get('/', function(req, res) {
        .then(function(authResponse) {
             services.updateToken(authResponse);
             db.insert();
+            res.send('You are connected to QBO');
          })
         .catch(function(e) {
              console.log(e);
+             res.send('There was issue when trying to connect to QBO: ', e);
          });
-    res.send('');
 });
 
 module.exports = router;
