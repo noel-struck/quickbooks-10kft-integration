@@ -2,8 +2,6 @@
 var config = {};
 
 //sandbox app config
-config.clientId = 'Q0LPhko5YOG7bCbjbLfUuzoKjOK7LwECMj6Jh2tOS85x8JhL5o';
-config.clientSecret = 'I84RqHjSYFbEna70grWMD3ULR757AlNGFX0j7H5h';
 config.environment = 'Sandbox';
 config.redirectUri = 'http://localhost:8080/callback';
 
@@ -32,7 +30,6 @@ config.qbo.webhooksSubscribedEntites = 'Customer,Vendor,Invoice';
 // 10Kft Credentials
 config.tenKft= {};
 config.tenKft.productionApi = 'https://api.10000ft.com';
-config.tenKft.sandboxApi = 'https://vnext.10000ft.com'; 
-config.tenKft.token = 'Y1M4UjVYZFFQczRTQXoxbXlFQWJCdW1FYkUxcXVhbkZOSlhsTXRULzRqNklFcVl6VThqSG1Db2x3YTljCm5oSVFWZ2FSaEcwSzZzVXRuM0dhbklNcTQyamZGTXZVYnBvOENrWko5MHp0R01ZdXNHMUxxK1FBYXVCdgpnZXJIZ0tTSAo'
+config.tenKft.sandboxApi = 'https://vnext.10000ft.com';
 
 module.exports = config;

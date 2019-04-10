@@ -41,8 +41,8 @@ function processTask(task) {
 				return console.log(err);
 			} else {	   		
 				var qbo = new QuickBooks(
-							config.clientId,
-							config.clientSecret,
+							process.env.CLIENT_ID,
+							process.env.CLIENT_SECRET,
 							company[0].accessToken,
 							false, // No token secret for oAuth2
 							company[0].companyId,

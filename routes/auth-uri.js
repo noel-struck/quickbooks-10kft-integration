@@ -6,8 +6,8 @@ var config = require('../conf');
 
 router.get('/', function(req,res) {
     config.oauthClient = new OAuthClient({
-        clientId: config.clientId,
-        clientSecret: config.clientSecret,
+        clientId: process.env.CLIENT_ID,
+        clientSecret: process.env.CLIENT_SECRET,
         environment: config.environment,
         redirectUri: config.redirectUri
     });

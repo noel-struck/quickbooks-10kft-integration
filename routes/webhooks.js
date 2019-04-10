@@ -71,8 +71,8 @@ router.post('/', function (req, res) {
 		const entityId = entity.id;
 		const entityName = entity.name;
 		const qbo = new QuickBooks(
-			config.clientId,
-			config.clientSecret,
+			process.env.CLIENT_ID,
+			process.env.CLIENT_SECRET,
 			config.qbo.accessToken,
 			false, // No token secret for oAuth2
 			config.qbo.companyId,
@@ -116,7 +116,7 @@ router.post('/', function (req, res) {
 			data: payload,
 			headers: {
 				'Content-Type': 'application/json',
-				'auth': config.tenKft.token
+				'auth': process.env.TEN_TOKEN
 			}
 		}
 		axios(apiOptions)
