@@ -57,10 +57,8 @@ function processTask(task) {
 					if (err) {
 						return console.log('There was an error', err);  
 					} else {
-					console.log('CDC complete');
 					//update timestamp
 					database.dbMemory.update({ companyId: realmId }, { $set:{lastCdcTimestamp: data.time}}, {});
-					console.log('completed update for realmId ' + realmId);
 					console.log('queue task complete');
 					}
 				});

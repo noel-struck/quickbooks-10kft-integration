@@ -6,9 +6,7 @@ const router = express.Router();
 const config = require('../conf');
 const services = require('../services');
 const QuickBooks = require('node-quickbooks');
-const https = require('https');
 const axios = require('axios');
-const fs = require('fs');
 const moment = require('moment');
 
 router.post('/', function (req, res) {
@@ -30,14 +28,13 @@ router.post('/', function (req, res) {
 	}
 
 	function listeningWebhook() {
-		/**
+		/*
 		 * Method to receive webhooks event notification 
 		 * 1. Validates payload
 		 * 2. Adds it to a queue
 		 * 3. Sends success response back
-		 * 
 		 * Note: Queue processing happens asynchronously
-		 */
+		*/
 
 		var payload = JSON.stringify(req.body);
 		var signature = req.get('intuit-signature')
@@ -56,12 +53,7 @@ router.post('/', function (req, res) {
 		if (util.isValidPayload(signature, payload)) {
 			const payloadJSON = JSON.parse(payload);
 			const entities = payloadJSON.eventNotifications[0].dataChangeEvent.entities;
-			
-			// TODO: Fix issue with AUTH in the following method
 			queue.addToQueue(payload);
-			// console.log('task added to queue ');
-
-			// Call here the corresponding API that match with its entity
 			processEntities(entities);
 			return res.status(200).send('success');
 		} else {
@@ -78,47 +70,28 @@ router.post('/', function (req, res) {
 	function entityController(entity) {
 		const entityId = entity.id;
 		const entityName = entity.name;
-		const companyId = config.qbo.companyId;
-		const customerApi = `${config.qbo.sandboxApi}/v3/company/${companyId}/customer/${entityId}`;
-		const customerApiOptions = {
-			method: 'get',
-			url: customerApi,
-			headers: {
-				'Authorization': `Bearer ${config.qbo.accessToken}`,
-				'Accept': 'application/json'
-			}
-		};
-
-		// var qbo = new QuickBooks(
-		// 	config.clientId,
-		// 	config.clientSecret,
-		// 	config.qbo.tokenSecret,
-		// 	false, // No token secret for oAuth2
-		// 	config.qbo.companyId,
-		// 	true, // use sandbox account
-		// 	true, // enable logs
-		// 	4, // minor version
-		// 	'2.0', // oAuth2
-		// 	config.qbo.refreshToken); 
+		const qbo = new QuickBooks(
+			config.clientId,
+			config.clientSecret,
+			config.qbo.accessToken,
+			false, // No token secret for oAuth2
+			config.qbo.companyId,
+			true, // use sandbox account
+			true, // enable logs
+			4, // minor version
+			'2.0', // oAuth2
+			config.qbo.refreshToken); 
 
 		switch (entityName) {
 			case 'Customer':
-				const fileName = `${moment().format('YY-MM-DD')}-customer-data.json`;
-				axios(customerApiOptions)
-					.then((resp) => {
-						const jsonData = resp.data.Customer;
-						const tenKftProject = parseProjectFromQboToTenKft(jsonData);
+				qbo.getCustomer(entityId, (error, resp) => {
+					if (error){
+						console.log('Could not save data in 10Kft ', error)
+					} else {
+						const tenKftProject = parseProjectFromQboToTenKft(resp);
 						createTenKftProject(tenKftProject);
-
-						// Save in a file for checking purpose
-						jsonToSave = JSON.stringify(jsonData);
-						fs.writeFile(fileName, jsonToSave, (error) => {
-							if (error) throw error;
-							console.log('file saved');
-						})		
-					}).catch((error) => {
-						console.log('there was an error ', error);
-					});
+					};
+				});
 				break;
 			default:
 				break;
@@ -129,7 +102,7 @@ router.post('/', function (req, res) {
 		return {
 			name: payload.DisplayName,
 			starts_at: moment(payload.MetaData.CreateTime).format('YYYY-MM-DD'),
-			ends_at: moment(payload.MetaData.LastUpdatedTime).add(1, 'year').format('YYYY-MM-DD')
+			ends_at: moment(payload.MetaData.LastUpdatedTime).add(1, 'year').format('YYYY-MM-DD') // Edit this to the right time average for a project
 		};
 		
 	}
@@ -147,7 +120,7 @@ router.post('/', function (req, res) {
 		}
 		axios(apiOptions)
 			.then((resp) => {
-				console.log('Project added: ', resp.data);
+				console.log('Project added to 10Kft!');
 			})
 			.catch((error) => {
 				console.log('There was an error trying to insert a new project in 10Kft ', error);

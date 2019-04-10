@@ -24,7 +24,7 @@ config.qbo.productionApi = 'https://quickbooks.api.intuit.com';
 config.qbo.sandboxApi = 'https://sandbox-quickbooks.api.intuit.com';
 config.qbo.companyId = '123146326747624';
 config.qbo.accessToken = '';
-config.qbo.tokenSecret = '';
+config.qbo.tokenSecret = false;
 config.qbo.refreshToken = '';
 //add more entities if required
 config.qbo.webhooksSubscribedEntites = 'Customer,Vendor,Invoice';
